@@ -1,0 +1,9 @@
+title1,ID1,WH,F,department,3,3
+title1,ID2,AS,F,department2,5,3
+title1,ID3,BL,F,department2,5,3
+title2,ID4,WH,gender3,department3,citations3,2
+title2,ID5,WH,gender3,department3,citations3,2
+title3,ID6,2X,gender3,department3,citations3,4
+title3,ID7,2X,gender3,department3,citations3,4
+title3,ID8,WH,gender3,department3,citations3,4
+title3,ID8,WH,gender3,department3,citations3,4
