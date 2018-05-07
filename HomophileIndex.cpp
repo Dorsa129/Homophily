@@ -21,6 +21,7 @@ Once reads a new title, it will delete this linked list (to free up memory) and 
 	You can also change these to work for gender or department
 	just make sure you update rest of code accordingly
 */
+	//ethnicities
 	int WH = 0;
 	int* WHptr = &WH;
 
@@ -38,6 +39,13 @@ Once reads a new title, it will delete this linked list (to free up memory) and 
 
 	int Other = 0;
 	int* Otherptr = &Other;
+	
+	//genders
+	int M = 0;
+	int* Mptr = &M;
+
+	int F = 0;
+	int* Fptr = &F;
 
 
 	string title;
@@ -53,7 +61,6 @@ Once reads a new title, it will delete this linked list (to free up memory) and 
 	//this is for reading in from a file and outputing to a file
 	ifstream ifs;
 	ofstream ofs;
-
 
 
 
@@ -79,7 +86,7 @@ void addLink(Authors* head){
 		}
 		//reads first observation (should be title)
 		getline(ifs, title, ',');
-
+		Authors* p;
 		//checks to see if title matches title of passed in linked list 
 		if(title != head->title){
 
@@ -89,7 +96,8 @@ void addLink(Authors* head){
 		else{
 
 		//creates new link
-		Authors* p = new Authors;
+		//variable p is reused (by having it point to a new struct Authors) so this saves memory space
+		p = new Authors;
 
 		//reads vital info
 		getline(ifs, ID, ',');
@@ -116,7 +124,8 @@ void addLink(Authors* head){
 		//this is a recursive function so it will keep going until it reaches an 
 		//observation with a new title that doesnt match with the rest of the linked list
 		addLink(p);
-		//not sure if i should delete p here, but i will figure out soon :P
+		
+
 		}
 
 }
@@ -131,8 +140,8 @@ void initializeEthnicities(){
 	*Otherptr = 0;
 }
 
-//finds the index
-double findHomophilyIndex(Authors* head){
+//finds the index for Race
+double findHomophilyRaceIndex(Authors* head){
 	
 	//need to initialize all the enthincity categories back to 0 for every new linked list
 	//this allows us to reuse variables and not waste memory space
@@ -205,7 +214,75 @@ double findHomophilyIndex(Authors* head){
 
 }
 
-void outputOntoFile (string outfile, Authors* head, double index){
+
+
+void initializeGenders(){
+	*Mptr = 0;
+	*Fptr = 0; 
+}
+
+double findHomophilyGenderIndex(Authors* head){
+	
+	//need to initialize genders back to 0 for every new linked list
+	//this allows us to reuse variables and not waste memory space
+	initializeGenders();
+	cout<<"title is: "<<head->title<<endl;
+
+
+	Authors* after = head->next;
+	Authors* prev = head;
+	//basically we have variable of the enthinicties that are intialized to 0
+	//this do loop will iterate through the linked list (that was passed in) 
+		//just reminder, each link in the list represents an author
+		//each list contains all the authors of one publication
+	//adds 1 to the appropriate ethnicity group
+	//example: looks at the ethnicity of first link (first author) and reads "WH", 
+		// it adds 1 to variable representing total number of WH
+
+	//this is a little confusing just cuz you kinda need to know about linked lists and pointers sorry :(
+
+	do{
+		if(prev->gender == "male"){
+			*Mptr = *Mptr +1;
+	
+		}
+		else { 
+			*Fptr = *Fptr+1; }
+
+		prev=after;
+		if(after==NULL){
+			after = after;
+		}
+		else{
+		after = after->next;}
+		
+	}while(prev!=NULL);
+
+
+	double index = 0;
+	//creates an array of all the ethnicties, each group represents total number of that race in the linked list
+
+	int genders[2] = {M,F};
+
+	//calculates index
+	//formula: summary of summation(#ofAuthorsWithRaceN/TotalAuthorsOfPublication)^2
+	for (int i = 0; i<2; i++) 
+	{
+		double g = static_cast<double>(genders[i]);
+		double a = static_cast<double>(head->numberAuthors);
+		double x = g/a;
+
+		index = index + pow(x, 2.0);
+	}
+
+	return index;
+
+}
+
+
+
+
+void outputOntoFile (string outfile, Authors* head, double RaceIndex, double GenderIndex){
 
 	Authors* after = head->next;
 	Authors* current = head;
@@ -216,7 +293,7 @@ void outputOntoFile (string outfile, Authors* head, double index){
 	//iterates through passed in linked list and outputs each title, ID, and corresponding homophily index
  	while(current!=NULL){
 
-		ofs<<current->title<<","<<current->ID<<","<<index<<endl;
+		ofs<<current->title<<","<<current->ID<<","<<RaceIndex<<","<<GenderIndex<<endl;
 
 		current=after;
 		if(after==NULL){
@@ -275,12 +352,14 @@ int main(int argc, char *argv[]){
 		addLink(head);
 
 		//finds the homphily index for this publication (this linked list)
-		double i = findHomophilyIndex(head);
+		double RaceIndex = findHomophilyRaceIndex(head);
+		double GenderIndex = findHomophilyGenderIndex(head);
 		//prints out index of this publicaiton
-		cout<<"index is: "<<i<<endl;
+		cout<<"Race index is: "<<RaceIndex<<endl;
+		cout<<"Gender index is: "<<GenderIndex<<endl;
 
 		//code to output the index onto a file
-		outputOntoFile (outfile, head, i);
+		outputOntoFile (outfile, head, RaceIndex, GenderIndex);
 
 		//free up memory space
 		delete head;
